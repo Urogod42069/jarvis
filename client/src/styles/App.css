@@ -1,0 +1,115 @@
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+}
+
+.app-header {
+  padding: 1.5rem 2rem;
+  background: rgba(26, 31, 58, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 0 10px var(--accent-blue));
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--error);
+  box-shadow: 0 0 10px currentColor;
+}
+
+.status-dot.connected {
+  background: var(--success);
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 1rem;
+}
+
+.mode-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+
+.mode-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: var(--text-primary);
+  border-color: var(--accent-blue);
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.app-main {
+  flex: 1;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1rem;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .mode-toggle {
+    gap: 0.5rem;
+  }
+
+  .mode-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .app-main {
+    padding: 1rem;
+  }
+}
