@@ -54,7 +54,9 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - [x] Database: added `get_conversation()` and `message_count()` methods
 
 - [x] `run_shell` tool — execute shell commands with 30s timeout, 64KB output cap, requires confirmation
+- [x] Streaming support — token-by-token output via `messages.stream()`, falls back to batch when no stream_fn
 
 ## Next Steps
-- [ ] Add streaming support for long responses
 - [ ] Consider web/API interface as alternative to CLI
+- [ ] Add more tools (web search, calendar, notes, etc.)
+- [ ] Add conversation title auto-generation from first message

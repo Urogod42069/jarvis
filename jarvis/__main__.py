@@ -140,16 +140,18 @@ def main() -> None:
                 console.print(f"[green]Started new conversation [bold]{conversation_id}[/bold][/green]")
                 continue
 
-            with console.status("[bold green]Thinking...[/bold green]"):
-                try:
-                    reply = agent.chat(user_input, confirm_fn=confirm_action)
-                except KeyboardInterrupt:
-                    console.print("\n[dim]Interrupted.[/dim]")
-                    continue
-
             console.print()
-            console.print(Panel(Markdown(reply), title="Jarvis", border_style="blue"))
-            console.print()
+            console.print("[bold blue]Jarvis:[/bold blue] ", end="")
+            try:
+                reply = agent.chat(
+                    user_input,
+                    confirm_fn=confirm_action,
+                    stream_fn=lambda chunk: console.print(chunk, end="", highlight=False),
+                )
+            except KeyboardInterrupt:
+                console.print("\n[dim]Interrupted.[/dim]")
+                continue
+            console.print("\n")
 
     except KeyboardInterrupt:
         pass

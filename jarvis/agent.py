@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 import anthropic
 
@@ -10,6 +10,9 @@ from . import config
 from .database import Database
 from .models import Message, ToolCall, ToolResult
 from .tools import get_tool, tool_definitions
+
+ConfirmFn = Callable[[ToolCall], bool]
+StreamFn = Callable[[str], None]
 
 
 class Agent:
@@ -20,7 +23,13 @@ class Agent:
 
     # -- public API --
 
-    def chat(self, user_text: str, *, confirm_fn: ConfirmFn | None = None) -> str:
+    def chat(
+        self,
+        user_text: str,
+        *,
+        confirm_fn: ConfirmFn | None = None,
+        stream_fn: StreamFn | None = None,
+    ) -> str:
         """Send user text, handle tool calls, return final assistant text."""
         self.db.add_message(
             self.conversation_id,
@@ -28,7 +37,7 @@ class Agent:
         )
 
         messages = self._build_messages()
-        return self._run_loop(messages, confirm_fn=confirm_fn)
+        return self._run_loop(messages, confirm_fn=confirm_fn, stream_fn=stream_fn)
 
     # -- internals --
 
@@ -37,7 +46,6 @@ class Agent:
         api_msgs: list[dict[str, Any]] = []
         for msg in self.db.get_messages(self.conversation_id):
             if msg.role == "user" and msg.tool_results:
-                # This is a tool_result turn
                 content: list[dict[str, Any]] = []
                 for tr in msg.tool_results:
                     content.append({
@@ -48,7 +56,6 @@ class Agent:
                     })
                 api_msgs.append({"role": "user", "content": content})
             elif msg.role == "assistant" and msg.tool_calls:
-                # Assistant turn with tool use blocks
                 content = []
                 if msg.content:
                     content.append({"type": "text", "text": msg.content})
@@ -69,32 +76,16 @@ class Agent:
         messages: list[dict[str, Any]],
         *,
         confirm_fn: ConfirmFn | None = None,
+        stream_fn: StreamFn | None = None,
     ) -> str:
         """Call the API in a loop until the model stops using tools."""
         while True:
-            response = self.client.messages.create(
-                model=config.MODEL,
-                max_tokens=4096,
-                system=config.SYSTEM_PROMPT,
-                tools=tool_definitions(),
-                messages=messages,
-            )
-
-            # Extract text and tool_use blocks
-            text_parts: list[str] = []
-            tool_calls: list[ToolCall] = []
-
-            for block in response.content:
-                if block.type == "text":
-                    text_parts.append(block.text)
-                elif block.type == "tool_use":
-                    tool_calls.append(ToolCall(
-                        tool_name=block.name,
-                        tool_input=block.input,
-                        call_id=block.id,
-                    ))
-
-            assistant_text = "\n".join(text_parts)
+            if stream_fn:
+                assistant_text, tool_calls, stop_reason = self._call_streaming(
+                    messages, stream_fn=stream_fn
+                )
+            else:
+                assistant_text, tool_calls, stop_reason = self._call_batch(messages)
 
             # Save assistant message
             self.db.add_message(
@@ -102,7 +93,7 @@ class Agent:
                 Message(role="assistant", content=assistant_text, tool_calls=tool_calls),
             )
 
-            if response.stop_reason != "tool_use" or not tool_calls:
+            if stop_reason != "tool_use" or not tool_calls:
                 return assistant_text
 
             # Execute tools
@@ -116,6 +107,56 @@ class Agent:
 
             # Rebuild messages for next iteration
             messages = self._build_messages()
+
+    def _call_batch(
+        self, messages: list[dict[str, Any]]
+    ) -> tuple[str, list[ToolCall], str]:
+        """Non-streaming API call."""
+        response = self.client.messages.create(
+            model=config.MODEL,
+            max_tokens=4096,
+            system=config.SYSTEM_PROMPT,
+            tools=tool_definitions(),
+            messages=messages,
+        )
+        return self._parse_response(response)
+
+    def _call_streaming(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        stream_fn: StreamFn,
+    ) -> tuple[str, list[ToolCall], str]:
+        """Streaming API call — emits text chunks via stream_fn."""
+        with self.client.messages.stream(
+            model=config.MODEL,
+            max_tokens=4096,
+            system=config.SYSTEM_PROMPT,
+            tools=tool_definitions(),
+            messages=messages,
+        ) as stream:
+            for text in stream.text_stream:
+                stream_fn(text)
+            response = stream.get_final_message()
+        return self._parse_response(response)
+
+    @staticmethod
+    def _parse_response(response: Any) -> tuple[str, list[ToolCall], str]:
+        """Extract text, tool calls, and stop reason from a response."""
+        text_parts: list[str] = []
+        tool_calls: list[ToolCall] = []
+
+        for block in response.content:
+            if block.type == "text":
+                text_parts.append(block.text)
+            elif block.type == "tool_use":
+                tool_calls.append(ToolCall(
+                    tool_name=block.name,
+                    tool_input=block.input,
+                    call_id=block.id,
+                ))
+
+        return "\n".join(text_parts), tool_calls, response.stop_reason
 
     def _execute_tools(
         self,
@@ -134,7 +175,6 @@ class Agent:
                 ))
                 continue
 
-            # Action proposal: ask for confirmation if the tool requires it
             if tool.requires_confirmation and confirm_fn:
                 approved = confirm_fn(tc)
                 if not approved:
@@ -155,8 +195,3 @@ class Agent:
             results.append(ToolResult(call_id=tc.call_id, output=output))
 
         return results
-
-
-# Type alias for the confirmation callback
-from typing import Callable
-ConfirmFn = Callable[[ToolCall], bool]
