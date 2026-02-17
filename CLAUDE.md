@@ -46,8 +46,9 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - [x] Unit-tested: tool registry, database CRUD, read_file tool, config validation
 - [x] Cleaned out old Node.js project files (client/, server/, package.json, etc.)
 
+- [x] Live API test passed: simple chat, tool use (read_file), conversation history persistence
+
 ## Next Steps
-- [ ] Update .env with a valid ANTHROPIC_API_KEY and test a live conversation
 - [ ] Add `/resume` command to continue a previous conversation
 - [ ] Add a second tool (e.g., `run_shell_command` with confirmation)
 - [ ] Add streaming support for long responses
