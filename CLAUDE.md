@@ -15,6 +15,8 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
   - `base.py` — abstract Tool base class (name, description, parameters, requires_confirmation, execute)
   - `read_file.py` — read local files (256KB limit, UTF-8 only, confirmation required)
   - `run_shell.py` — run shell commands (30s timeout, 64KB output limit, confirmation required)
+  - `write_file.py` — write/create files (256KB limit, creates parent dirs, confirmation required)
+  - `web_search.py` — web search via Gemini API + Google Search grounding (no confirmation needed)
 
 ### Key Design Decisions
 - Tools use Anthropic's native tool_use / function calling API
@@ -25,6 +27,7 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 
 ### Dependencies
 - `anthropic` — Claude API client
+- `google-genai` — Gemini API client (for web_search grounding)
 - `python-dotenv` — env file loading
 - `rich` — terminal UI (panels, markdown rendering, status spinners)
 
@@ -57,6 +60,11 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - [x] Streaming support — token-by-token output via `messages.stream()`, falls back to batch when no stream_fn
 - [x] Conversation title auto-generation — Haiku generates 3-6 word title after first message, best-effort
 
+- [x] `write_file` tool — write/create files with 256KB limit, creates parent dirs, requires confirmation
+
+- [x] `web_search` tool — Gemini API with Google Search grounding, returns answer + source URLs, no confirmation needed
+- [x] System prompt customization — loads `~/.jarvis/system_prompt.md` if present and appends to base prompt
+
 ## Next Steps
+- [ ] Add `GEMINI_API_KEY` to `.env` and live-test `web_search` tool
 - [ ] Consider web/API interface as alternative to CLI
-- [ ] Add more tools (web search, calendar, notes, etc.)
