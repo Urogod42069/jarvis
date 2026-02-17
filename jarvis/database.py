@@ -65,6 +65,20 @@ class Database:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    def get_conversation(self, conversation_id: str) -> dict | None:
+        row = self.conn.execute(
+            "SELECT id, title, created_at, updated_at FROM conversations WHERE id = ?",
+            (conversation_id,),
+        ).fetchone()
+        return dict(row) if row else None
+
+    def message_count(self, conversation_id: str) -> int:
+        row = self.conn.execute(
+            "SELECT COUNT(*) FROM messages WHERE conversation_id = ?",
+            (conversation_id,),
+        ).fetchone()
+        return row[0]
+
     # -- messages --
 
     def add_message(self, conversation_id: str, msg: Message) -> None:

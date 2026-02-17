@@ -47,9 +47,12 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - [x] Cleaned out old Node.js project files (client/, server/, package.json, etc.)
 
 - [x] Live API test passed: simple chat, tool use (read_file), conversation history persistence
+- [x] `/resume` command — pick from recent conversations or pass ID directly, replays history
+- [x] `/new` command — start a fresh conversation mid-session
+- [x] `/history` now shows message counts
+- [x] Database: added `get_conversation()` and `message_count()` methods
 
 ## Next Steps
-- [ ] Add `/resume` command to continue a previous conversation
 - [ ] Add a second tool (e.g., `run_shell_command` with confirmation)
 - [ ] Add streaming support for long responses
 - [ ] Consider web/API interface as alternative to CLI
