@@ -31,13 +31,40 @@ class Agent:
         stream_fn: StreamFn | None = None,
     ) -> str:
         """Send user text, handle tool calls, return final assistant text."""
+        is_first_message = self.db.message_count(self.conversation_id) == 0
+
         self.db.add_message(
             self.conversation_id,
             Message(role="user", content=user_text),
         )
 
         messages = self._build_messages()
-        return self._run_loop(messages, confirm_fn=confirm_fn, stream_fn=stream_fn)
+        reply = self._run_loop(messages, confirm_fn=confirm_fn, stream_fn=stream_fn)
+
+        if is_first_message:
+            self._generate_title(user_text)
+
+        return reply
+
+    def _generate_title(self, first_message: str) -> None:
+        """Generate a short conversation title from the first user message."""
+        try:
+            response = self.client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=30,
+                messages=[{
+                    "role": "user",
+                    "content": (
+                        "Generate a concise title (3-6 words, no quotes) for a conversation "
+                        f"that starts with this message:\n\n{first_message[:500]}"
+                    ),
+                }],
+            )
+            title = response.content[0].text.strip().strip('"\'')
+            if title:
+                self.db.update_title(self.conversation_id, title)
+        except Exception:
+            pass  # title generation is best-effort
 
     # -- internals --
 

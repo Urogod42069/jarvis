@@ -72,6 +72,13 @@ class Database:
         ).fetchone()
         return dict(row) if row else None
 
+    def update_title(self, conversation_id: str, title: str) -> None:
+        self.conn.execute(
+            "UPDATE conversations SET title = ? WHERE id = ?",
+            (title, conversation_id),
+        )
+        self.conn.commit()
+
     def message_count(self, conversation_id: str) -> int:
         row = self.conn.execute(
             "SELECT COUNT(*) FROM messages WHERE conversation_id = ?",
