@@ -13,7 +13,8 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - **Models**: `jarvis/models.py` — Message, ToolCall, ToolResult dataclasses
 - **Tool system**: `jarvis/tools/` — auto-discovered plugins
   - `base.py` — abstract Tool base class (name, description, parameters, requires_confirmation, execute)
-  - `read_file.py` — example tool: read local files (256KB limit, UTF-8 only)
+  - `read_file.py` — read local files (256KB limit, UTF-8 only, confirmation required)
+  - `run_shell.py` — run shell commands (30s timeout, 64KB output limit, confirmation required)
 
 ### Key Design Decisions
 - Tools use Anthropic's native tool_use / function calling API
@@ -52,7 +53,8 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - [x] `/history` now shows message counts
 - [x] Database: added `get_conversation()` and `message_count()` methods
 
+- [x] `run_shell` tool — execute shell commands with 30s timeout, 64KB output cap, requires confirmation
+
 ## Next Steps
-- [ ] Add a second tool (e.g., `run_shell_command` with confirmation)
 - [ ] Add streaming support for long responses
 - [ ] Consider web/API interface as alternative to CLI
