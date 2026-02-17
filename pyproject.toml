@@ -2,7 +2,7 @@
 name = "jarvis"
 version = "0.1.0"
 description = "Jarvis — personal AI assistant powered by Claude"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
     "anthropic>=0.39.0",
     "python-dotenv>=1.0.0",
@@ -13,5 +13,5 @@ dependencies = [
 jarvis = "jarvis.__main__:main"
 
 [build-system]
-requires = ["setuptools>=75.0"]
-build-backend = "setuptools.backends._legacy:_Backend"
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"

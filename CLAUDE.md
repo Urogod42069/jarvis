@@ -27,6 +27,10 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - `python-dotenv` — env file loading
 - `rich` — terminal UI (panels, markdown rendering, status spinners)
 
+### Notes
+- `requires-python` set to `>=3.9` (system Python on macOS is 3.9.6)
+- `build-backend` is `setuptools.build_meta` (standard path)
+
 ## Completed
 - [x] Project structure and pyproject.toml
 - [x] Configuration from environment variables
@@ -38,10 +42,12 @@ Personal AI assistant CLI powered by Claude (Anthropic API). Python backend with
 - [x] Action proposal system (y/n confirmation before tool execution)
 - [x] CLI REPL with Rich formatting
 - [x] README with setup instructions and tool authoring guide
+- [x] venv setup + `pip install -e .` verified (all deps install cleanly)
+- [x] Unit-tested: tool registry, database CRUD, read_file tool, config validation
+- [x] Cleaned out old Node.js project files (client/, server/, package.json, etc.)
 
 ## Next Steps
-- [ ] Set up venv and verify `pip install -e .` works end to end
-- [ ] Test a real conversation with the Anthropic API
+- [ ] Update .env with a valid ANTHROPIC_API_KEY and test a live conversation
 - [ ] Add `/resume` command to continue a previous conversation
 - [ ] Add a second tool (e.g., `run_shell_command` with confirmation)
 - [ ] Add streaming support for long responses
