@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import Any
 
 from .base import Tool
@@ -45,21 +46,25 @@ class WebSearchTool(Tool):
             return "Error: GEMINI_API_KEY is not set in .env"
 
         try:
-            from google import genai
-            from google.genai import types
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                from google import genai
+                from google.genai import types
         except ImportError:
             return "Error: google-genai package is not installed. Run: pip install google-genai"
 
         client = genai.Client(api_key=api_key)
 
         try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=query,
-                config=types.GenerateContentConfig(
-                    tools=[types.Tool(google_search=types.GoogleSearch())],
-                ),
-            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=query,
+                    config=types.GenerateContentConfig(
+                        tools=[types.Tool(google_search=types.GoogleSearch())],
+                    ),
+                )
         except Exception as exc:
             return f"Error during web search: {exc}"
 
