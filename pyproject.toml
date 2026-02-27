@@ -7,10 +7,13 @@ dependencies = [
     "anthropic>=0.39.0",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
 ]
 
 [project.scripts]
 jarvis = "jarvis.__main__:main"
+jarvis-api = "jarvis.api:main"
 
 [build-system]
 requires = ["setuptools>=64"]
